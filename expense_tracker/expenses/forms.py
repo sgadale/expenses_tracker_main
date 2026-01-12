@@ -3,26 +3,18 @@ from .models import Expense, MonthlyBudget
 
 
 class ExpenseForm(forms.ModelForm):
-    class Meta: 
+    class Meta:
         model = Expense
         exclude = ['user']
         widgets = {
-            'date': forms.DateInput(
-                attrs={
-                    'type': 'date'   # ✅ calendar picker
-                }
-            )
+            'date': forms.DateInput(attrs={'type': 'date'})
         }
 
 
 class BudgetForm(forms.ModelForm):
-    class Meta: 
+    class Meta:
         model = MonthlyBudget
         exclude = ['user']
         widgets = {
-            'date': forms.DateInput(
-                attrs={
-                    'type': 'date'   # ✅ calendar picker
-                }
-            )
+            'month': forms.DateInput(attrs={'type': 'month'})
         }

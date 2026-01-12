@@ -121,3 +121,5 @@ STATIC_URL = 'static/'
 # login, logout routes
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+STATICFILES_DIRS = [BASE_DIR / 'static']

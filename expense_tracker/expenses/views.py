@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from datetime import date
 
 from .models import MonthlyBudget, Expense
 from .forms import ExpenseForm, BudgetForm
@@ -11,25 +12,35 @@ from .forms import ExpenseForm, BudgetForm
 # Dashboard view
 @login_required
 def dashboard(request):
+    selected_month = request.GET.get('month')
     expenses = Expense.objects.filter(user=request.user)
 
-    total_expense = expenses.aggregate(
-        total=Sum('amount'))['total'] or 0
-    budget = MonthlyBudget.objects.filter(user=request.user).last()
+    if selected_month:
+        year, month = selected_month.split('-')
+        expenses = expenses.filter(date__year=year, date__month=month)
 
+    total_expense = expenses.aggregate(total=Sum('amount'))['total'] or 0
+
+    budget = MonthlyBudget.objects.filter(user=request.user).last()
     remaining = budget.amount - total_expense if budget else 0
 
-    if remaining < 0:
-        messages.warning(request, 'You have exceeded your monthly budget!')
+    category_totals = expenses.values(
+        'category__name'
+    ).annotate(total=Sum('amount'))
 
-    return render(
-        request, 'expenses/dashboard.html',
-        {
-            'expenses': expenses,
-            'totoal_expenses': total_expense,
-            'budget': budget,
-            'remaining': remaining 
-        })
+    if remaining < 0:
+        messages.warning(request, "You have exceeded your budget!")
+
+    return render(request, 'expenses/dashboard.html', {
+        'expenses': expenses,
+        'total_expense': total_expense,
+        'budget': budget,
+        'remaining': remaining,
+        'selected_month': selected_month,
+        'category_totals': category_totals
+    })
+
+
 
 # Add expense
 @login_required
@@ -66,10 +77,24 @@ def edit_expense(request, pk):
 
     if form.is_valid():
         form.save()
-        messages.success(request, "Expense updated successfully")
+        messages.success(request, "Expense updated")
         return redirect('dashboard')
 
     return render(request, 'expenses/expense_form.html', {
         'form': form,
         'is_edit': True
+    })
+
+
+@login_required
+def delete_expense(request, pk):
+    expense = get_object_or_404(Expense, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        expense.delete()
+        messages.success(request, "Expense deleted")
+        return redirect('dashboard')
+
+    return render(request, 'expenses/confirm_delete.html', {
+        'expense': expense
     })

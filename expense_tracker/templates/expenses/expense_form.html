@@ -1,32 +1,14 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h2>Add Expense</h2>
+
+<h2>{% if is_edit %}Edit Expense{% else %}Add Expense{% endif %}</h2>
 
 <form method="post">
     {% csrf_token %}
-    <label>Category:</label>
-    {{ form.category }}
-    <br>
-
-    <br>
-    <label>Title:</label>
-    {{ form.title }}
-    <br>
-
-    <br>
-    <label>Amount:</label>
-    {{ form.amount }}
-    <br>
-
-    <br>
-    <label>Date:</label>
-    {{ form.date }}
-    <br>
-
-    <br>
-    <button type="submit">Save Expense</button>
+    {{ form.as_p }}
+    <button type="submit">Save</button>
 </form>
 
 <a href="{% url 'dashboard' %}">⬅ Back</a>
+
 {% endblock %}
