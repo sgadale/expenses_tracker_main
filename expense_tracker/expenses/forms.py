@@ -16,5 +16,11 @@ class BudgetForm(forms.ModelForm):
         model = MonthlyBudget
         exclude = ['user']
         widgets = {
-            'month': forms.DateInput(attrs={'type': 'month'})
+            'month': forms.DateInput(
+                attrs={'type': 'month'},
+                format='%Y-%m'          # ✅ IMPORTANT
+            )
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['month'].input_formats = ['%Y-%m']

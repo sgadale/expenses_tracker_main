@@ -77,7 +77,7 @@ def edit_expense(request, pk):
 
     if form.is_valid():
         form.save()
-        messages.success(request, "Expense updated")
+        messages.success(request, "Expense updated!")
         return redirect('dashboard')
 
     return render(request, 'expenses/expense_form.html', {
@@ -92,7 +92,7 @@ def delete_expense(request, pk):
 
     if request.method == 'POST':
         expense.delete()
-        messages.success(request, "Expense deleted")
+        messages.success(request, "Expense deleted!")
         return redirect('dashboard')
 
     return render(request, 'expenses/confirm_delete.html', {
