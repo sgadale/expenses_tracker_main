@@ -1,67 +1,174 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>Dashboard</h2>
+<h3 class="mb-3">Dashboard</h3>
 
-<form method="get">
-    <label>Select Month:</label>
-    <input type="month" name="month" value="{{ selected_month }}">
-    <button type="submit">Filter</button>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+        <input type="month" name="month" value="{{ selected_month }}" class="form-control">
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">Filter</button>
+    </div>
 </form>
 
-<p><strong>Total Expense:</strong> ₹{{ total_expense }}</p>
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6>Total Expense</h6>
+            <h4>₹{{ total_expense }}</h4>
+        </div>
+    </div>
 
-{% if budget %}
-<p><strong>Budget:</strong> ₹{{ budget.amount }}</p>
-<p><strong>Remaining:</strong> ₹{{ remaining }}</p>
-{% else %}
-<p>No budget set</p>
-{% endif %}
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6>Budget</h6>
+            <h4>
+                {% if budget %}
+                    ₹{{ budget.amount }}
+                {% else %}
+                    Not Set
+                {% endif %}
+            </h4>
+        </div>
+    </div>
 
-<a href="{% url 'add_expense' %}">➕ Add Expense</a>
-<a href="{% url 'set_budget' %}">💰 Set Budget</a>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6>Remaining</h6>
+            <h4>₹{{ remaining }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+    + Add Expense
+    </button>
+
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#budgetModal">
+    Set Budget
+    </button>
+</div>
 
 <hr>
 
-<h3>Expenses</h3>
+<h5>Expenses</h5>
 
-<table>
-<tr>
-    <th>Title</th>
-    <th>Category</th>
-    <th>Amount</th>
-    <th>Date</th>
-    <th>Actions</th>
-</tr>
-
-{% for expense in expenses %}
-<tr>
-    <td>{{ expense.title }}</td>
-    <td>{{ expense.category }}</td>
-    <td>₹{{ expense.amount }}</td>
-    <td>{{ expense.date }}</td>
-    <td>
-        <a href="{% url 'edit_expense' expense.id %}">Edit</a>
-        <a href="{% url 'delete_expense' expense.id %}">Delete</a>
-    </td>
-</tr>
-{% empty %}
-<tr>
-    <td colspan="5">No expenses</td>
-</tr>
-{% endfor %}
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th width="140">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.title }}</td>
+            <td>{{ expense.category }}</td>
+            <td>₹{{ expense.amount }}</td>
+            <td>{{ expense.date }}</td>
+            <td>
+                <a href="{% url 'edit_expense' expense.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete_expense' expense.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">No expenses found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
 <hr>
 
-<h3>Category-wise Totals</h3>
-
-<ul>
-{% for item in category_totals %}
-<li>{{ item.category__name }}: ₹{{ item.total }}</li>
-{% empty %}
-<li>No data</li>
-{% endfor %}
+<h5>Category-wise Totals</h5>
+<ul class="list-group col-md-6">
+    {% for item in category_totals %}
+        <li class="list-group-item d-flex justify-content-between">
+            <span>{{ item.category__name }}</span>
+            <strong>₹{{ item.total }}</strong>
+        </li>
+    {% empty %}
+        <li class="list-group-item">No data</li>
+    {% endfor %}
 </ul>
+
+
+<div class="modal fade" id="addExpenseModal" tabindex="-1">
+    <script>
+        const addExpenseModal = document.getElementById('addExpenseModal');
+        addExpenseModal.addEventListener('shown.bs.modal', function () {
+            addExpenseModal.querySelector('input').focus();
+        });
+    </script>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form method="post" action="{% url 'add_expense' %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Add Expense</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+            {% for field in expense_form %}
+            <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger small">
+                    {{ field.errors|striptags }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="budgetModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <form method="post" action="{% url 'set_budget' %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Set Monthly Budget</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          {{ budget_form.as_p }}
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Save</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
 
 {% endblock %}

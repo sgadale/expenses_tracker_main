@@ -7,8 +7,12 @@ class ExpenseForm(forms.ModelForm):
         model = Expense
         exclude = ['user']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'})
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
         }
+
 
 
 class BudgetForm(forms.ModelForm):
@@ -16,11 +20,10 @@ class BudgetForm(forms.ModelForm):
         model = MonthlyBudget
         exclude = ['user']
         widgets = {
-            'month': forms.DateInput(
-                attrs={'type': 'month'},
-                format='%Y-%m'          # ✅ IMPORTANT
-            )
+            'month': forms.DateInput(attrs={'type': 'month', 'class': 'form-control'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['month'].input_formats = ['%Y-%m']

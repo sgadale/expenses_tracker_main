@@ -8,7 +8,20 @@ from datetime import date
 from .models import MonthlyBudget, Expense
 from .forms import ExpenseForm, BudgetForm
 
+from django.contrib.auth.forms import UserCreationForm
+
 # Create your views here.
+def signup(request):
+    form = UserCreationForm(request.POST or None)
+
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Account created successfully. Please login.")
+        return redirect('login')
+
+    return render(request, 'registration/signup.html', {'form': form})
+
+
 # Dashboard view
 @login_required
 def dashboard(request):
@@ -37,7 +50,9 @@ def dashboard(request):
         'budget': budget,
         'remaining': remaining,
         'selected_month': selected_month,
-        'category_totals': category_totals
+        'category_totals': category_totals,
+        'expense_form': ExpenseForm(),
+        'budget_form': BudgetForm(),
     })
 
 
