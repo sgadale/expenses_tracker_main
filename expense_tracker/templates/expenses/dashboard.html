@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- ================= Dashboard Header ================= -->
 <h3 class="mb-4">Dashboard</h3>
 
 <!-- ================= Summary Cards ================= -->
@@ -12,20 +11,14 @@
             <h4 class="mb-0">₹{{ total_expense }}</h4>
         </div>
     </div>
-
     <div class="col-md-4">
         <div class="card shadow-sm p-3">
             <h6>Budget</h6>
             <h4 class="mb-0">
-                {% if budget %}
-                    ₹{{ budget.amount }}
-                {% else %}
-                    Not Set
-                {% endif %}
+                {% if budget %}₹{{ budget.amount }}{% else %}Not Set{% endif %}
             </h4>
         </div>
     </div>
-
     <div class="col-md-4">
         <div class="card shadow-sm p-3">
             <h6>Remaining</h6>
@@ -36,71 +29,88 @@
 
 <!-- ================= Actions + Filter Row ================= -->
 <div class="row align-items-center mb-4">
-    <!-- Add Expense -->
+
     <div class="col-auto">
-        <button type="button"
-                class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#addExpenseModal">
+        <button type="button" class="btn btn-success"
+                data-bs-toggle="modal" data-bs-target="#addExpenseModal">
             + Add Expense
         </button>
     </div>
 
-    <!-- Set Budget -->
     <div class="col-auto">
-        <button type="button"
-                class="btn btn-secondary"
-                data-bs-toggle="modal"
-                data-bs-target="#budgetModal">
+        <button type="button" class="btn btn-secondary"
+                data-bs-toggle="modal" data-bs-target="#budgetModal">
             Set Budget
         </button>
     </div>
 
     <!-- Filter -->
-    <div class="col-md-3 ms-auto">
-        <form method="get" class="d-flex gap-2">
-            <input type="month"
-                   name="month"
-                   value="{{ selected_month }}"
-                   class="form-control">
-            <button class="btn btn-primary">Filter</button>
+    <div class="col-auto ms-auto">
+        <form method="get" id="monthFilterForm"
+              class="d-flex align-items-center gap-2">
+
+            <!-- Selected Month Display -->
+            <span id="selectedMonthLabel"
+                  class="badge bg-light text-dark border px-3 py-2">
+                {% if selected_month %}
+                    {% with selected_month|slice:":4" as year %}
+                    {% with selected_month|slice:"5:7" as month %}
+                        {% if month == "01" %}Jan{% elif month == "02" %}Feb{% elif month == "03" %}Mar
+                        {% elif month == "04" %}Apr{% elif month == "05" %}May{% elif month == "06" %}Jun
+                        {% elif month == "07" %}Jul{% elif month == "08" %}Aug{% elif month == "09" %}Sep
+                        {% elif month == "10" %}Oct{% elif month == "11" %}Nov{% elif month == "12" %}Dec
+                        {% endif %}
+                        {{ year }}
+                    {% endwith %}
+                    {% endwith %}
+                {% else %}
+                    No filter
+                {% endif %}
+            </span>
+
+            <!-- Month Picker -->
+            <label class="month-picker-wrapper mb-0">
+                <input type="month"
+                       name="month"
+                       id="monthPicker"
+                       value="{{ selected_month }}"
+                       class="month-picker-hidden">
+                <span class="calendar-icon">📅</span>
+            </label>
+
+            <!-- Apply Filter -->
+            <button class="btn btn-primary" type="submit">
+                Filter
+            </button>
         </form>
     </div>
+
 </div>
 
 <!-- ================= Tabs ================= -->
-<ul class="nav nav-tabs mb-3" id="expenseTabs" role="tablist">
-    <li class="nav-item" role="presentation">
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
         <button class="nav-link active"
-                id="expenses-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#expenses"
-                type="button"
-                role="tab">
+                type="button">
             Expenses
         </button>
     </li>
-
-    <li class="nav-item" role="presentation">
+    <li class="nav-item">
         <button class="nav-link"
-                id="category-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#category"
-                type="button"
-                role="tab">
+                type="button">
             Category-wise Total
         </button>
     </li>
 </ul>
 
-<!-- ================= Tab Content ================= -->
-<div class="tab-content" id="expenseTabsContent">
+<div class="tab-content">
 
-    <!-- ===== Expenses Tab ===== -->
-    <div class="tab-pane fade show active"
-         id="expenses"
-         role="tabpanel">
-
+    <!-- Expenses Tab -->
+    <div class="tab-pane fade show active" id="expenses">
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
@@ -120,13 +130,9 @@
                     <td>{{ expense.date }}</td>
                     <td>
                         <a href="{% url 'edit_expense' expense.id %}"
-                           class="btn btn-sm btn-warning">
-                            Edit
-                        </a>
+                           class="btn btn-sm btn-warning">Edit</a>
                         <a href="{% url 'delete_expense' expense.id %}"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
+                           class="btn btn-sm btn-danger">Delete</a>
                     </td>
                 </tr>
                 {% empty %}
@@ -138,14 +144,10 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
 
-    <!-- ===== Category-wise Total Tab ===== -->
-    <div class="tab-pane fade"
-         id="category"
-         role="tabpanel">
-
+    <!-- Category Tab -->
+    <div class="tab-pane fade" id="category">
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
@@ -168,87 +170,47 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
 
 </div>
 
-<!-- ================= Add Expense Modal ================= -->
-<div class="modal fade" id="addExpenseModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{% url 'add_expense' %}">
-                {% csrf_token %}
+<!-- ================= JS (UPDATE LABEL ONLY) ================= -->
+<script>
+const monthPicker = document.getElementById('monthPicker');
+const monthLabel = document.getElementById('selectedMonthLabel');
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Expense</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+monthPicker.addEventListener('change', function () {
+    if (!this.value) return;
 
-                <div class="modal-body">
-                    {% for field in expense_form %}
-                        <div class="mb-3">
-                            <label class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <div class="text-danger small">
-                                    {{ field.errors|striptags }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
+    const [year, month] = this.value.split('-');
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    monthLabel.textContent = `${monthNames[parseInt(month) - 1]} ${year}`;
+});
+</script>
 
-<!-- ================= Set Budget Modal ================= -->
-<div class="modal fade" id="budgetModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{% url 'set_budget' %}">
-                {% csrf_token %}
+<!-- ================= CSS ================= -->
+<style>
+.month-picker-wrapper {
+    position: relative;
+    cursor: pointer;
+}
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Set Monthly Budget</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+.month-picker-hidden {
+    position: absolute;
+    opacity: 0;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
 
-                <div class="modal-body">
-                    {% for field in budget_form %}
-                        <div class="mb-3">
-                            <label class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <div class="text-danger small">
-                                    {{ field.errors|striptags }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Save</button>
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+.calendar-icon {
+    font-size: 18px;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background: #fff;
+}
+</style>
 
 {% endblock %}
