@@ -2,28 +2,18 @@
 {% block content %}
 
 <h3 class="mb-3">Dashboard</h3>
-
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-4">
-        <input type="month" name="month" value="{{ selected_month }}" class="form-control">
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">Filter</button>
-    </div>
-</form>
-
 <div class="row mb-4">
     <div class="col-md-4">
-        <div class="card p-3">
+        <div class="card shadow-sm p-3">
             <h6>Total Expense</h6>
-            <h4>₹{{ total_expense }}</h4>
+            <h4 class="mb-0">₹{{ total_expense }}</h4>
         </div>
     </div>
 
     <div class="col-md-4">
-        <div class="card p-3">
+        <div class="card shadow-sm p-3">
             <h6>Budget</h6>
-            <h4>
+            <h4 class="mb-0">
                 {% if budget %}
                     ₹{{ budget.amount }}
                 {% else %}
@@ -34,24 +24,45 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card p-3">
+        <div class="card shadow-sm p-3">
             <h6>Remaining</h6>
-            <h4>₹{{ remaining }}</h4>
+            <h4 class="mb-0">₹{{ remaining }}</h4>
         </div>
     </div>
 </div>
 
-<div class="mb-3">
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
-    + Add Expense
-    </button>
+<div class="row align-items-center mb-4">
+    <!-- Add Expense -->
+    <div class="col-auto">
+        <button type="button"
+                class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#addExpenseModal">
+            + Add Expense
+        </button>
+    </div>
 
-    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#budgetModal">
-    Set Budget
-    </button>
+    <!-- Set Budget -->
+    <div class="col-auto">
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#budgetModal">
+            Set Budget
+        </button>
+    </div>
+
+    <!-- Filter -->
+    <div class="col-md-3 ms-auto">
+        <form method="get" class="d-flex gap-2">
+            <input type="month"
+                   name="month"
+                   value="{{ selected_month }}"
+                   class="form-control">
+            <button class="btn btn-primary">Filter</button>
+        </form>
+    </div>
 </div>
-
-<hr>
 
 <h5>Expenses</h5>
 
@@ -171,4 +182,4 @@
   </div>
 </div>
 
-{% endblock %}
+{% endblock %} 
