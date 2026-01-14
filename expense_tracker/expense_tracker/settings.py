@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'expense_tracker.urls'
+ROOT_URLCONF = 'expense_tracker.expense_tracker.urls'
 
 TEMPLATES = [
     {
