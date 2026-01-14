@@ -36,53 +36,62 @@
     </div>
 
     <!-- ================= ACTION ROW ================= -->
-    <div class="d-flex align-items-center gap-2 mb-4">
+    <div class="d-flex align-items-center mb-4">
 
-        <!-- Add Expense -->
-        <button
-            class="btn btn-success"
-            data-bs-toggle="modal"
-            data-bs-target="#addExpenseModal">
-            + Add Expense
-        </button>
+        <!-- LEFT ACTIONS -->
+        <div class="d-flex gap-2">
+            <button
+                class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#addExpenseModal">
+                + Add Expense
+            </button>
 
-        <!-- Set Budget -->
-        <button
-            class="btn btn-secondary"
-            data-bs-toggle="modal"
-            data-bs-target="#setBudgetModal">
-            Set Budget
-        </button>
+            <button
+                class="btn btn-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#setBudgetModal">
+                Set Budget
+            </button>
+        </div>
 
-        <!-- ================= FILTER ================= -->
-        <form method="get" class="d-flex align-items-center gap-2 ms-2">
+        <!-- RIGHT FILTER (FORCED TO RIGHT) -->
+        <form method="get" class="d-flex align-items-center gap-2 ms-auto">
+
+            <!-- No filter -->
+            {% if selected_month %}
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                    No filter
+                </a>
+            {% endif %}
 
             <!-- Selected month display -->
             <input
                 type="text"
                 id="selectedMonthDisplay"
-                class="form-control"
-                style="width:140px"
+                class="form-control text-center"
+                style="width:120px"
                 readonly
+                placeholder="Select month"
                 value="{{ selected_month|default:'' }}">
 
-            <!-- Hidden month input -->
+            <!-- Hidden actual month input -->
             <input
                 type="month"
-                name="month"
                 id="monthInput"
+                name="month"
                 class="d-none"
                 value="{{ selected_month|default:'' }}">
 
-            <!-- Calendar icon -->
+            <!-- Calendar button -->
             <button
                 type="button"
                 class="btn btn-outline-secondary"
-                onclick="document.getElementById('monthInput').showPicker()">
+                id="calendarBtn">
                 📅
             </button>
 
-            <!-- Apply Filter -->
+            <!-- Apply filter -->
             <button
                 class="btn btn-primary"
                 type="submit"
@@ -91,12 +100,6 @@
                 Filter
             </button>
 
-            <!-- Clear Filter -->
-            {% if selected_month %}
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-danger">
-                Clear
-            </a>
-            {% endif %}
         </form>
     </div>
 
@@ -218,13 +221,16 @@
     const monthInput = document.getElementById("monthInput");
     const displayInput = document.getElementById("selectedMonthDisplay");
     const filterBtn = document.getElementById("filterBtn");
+    const calendarBtn = document.getElementById("calendarBtn");
 
-    if (monthInput) {
-        monthInput.addEventListener("change", function () {
-            displayInput.value = this.value;
-            filterBtn.disabled = !this.value;
-        });
-    }
+    calendarBtn.addEventListener("click", () => {
+        monthInput.showPicker();
+    });
+
+    monthInput.addEventListener("change", function () {
+        displayInput.value = this.value;
+        filterBtn.disabled = !this.value;
+    });
 </script>
 
 {% endblock %}
