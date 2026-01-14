@@ -4,10 +4,10 @@
 {% block content %}
 <div class="container mt-4">
 
-    <!-- Dashboard Header -->
+    <!-- ================= DASHBOARD HEADER ================= -->
     <h2 class="mb-4">Dashboard</h2>
 
-    <!-- Summary Cards -->
+    <!-- ================= SUMMARY CARDS ================= -->
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card shadow-sm">
@@ -35,10 +35,10 @@
         </div>
     </div>
 
-    <!-- Action Row -->
+    <!-- ================= ACTION ROW ================= -->
     <div class="d-flex align-items-center gap-2 mb-4">
 
-        <!-- Add Expense Button -->
+        <!-- Add Expense -->
         <button
             class="btn btn-success"
             data-bs-toggle="modal"
@@ -46,7 +46,7 @@
             + Add Expense
         </button>
 
-        <!-- Set Budget Button -->
+        <!-- Set Budget -->
         <button
             class="btn btn-secondary"
             data-bs-toggle="modal"
@@ -54,19 +54,54 @@
             Set Budget
         </button>
 
-        <!-- Filter -->
-        <form method="get" class="d-flex align-items-center ms-auto gap-2">
+        <!-- ================= FILTER ================= -->
+        <form method="get" class="d-flex align-items-center gap-2 ms-2">
+
+            <!-- Selected month display -->
+            <input
+                type="text"
+                id="selectedMonthDisplay"
+                class="form-control"
+                style="width:140px"
+                readonly
+                value="{{ selected_month|default:'' }}">
+
+            <!-- Hidden month input -->
             <input
                 type="month"
                 name="month"
-                class="form-control"
-                value="{{ selected_month }}">
-            <button class="btn btn-primary" type="submit">Filter</button>
+                id="monthInput"
+                class="d-none"
+                value="{{ selected_month|default:'' }}">
+
+            <!-- Calendar icon -->
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onclick="document.getElementById('monthInput').showPicker()">
+                📅
+            </button>
+
+            <!-- Apply Filter -->
+            <button
+                class="btn btn-primary"
+                type="submit"
+                id="filterBtn"
+                {% if not selected_month %}disabled{% endif %}>
+                Filter
+            </button>
+
+            <!-- Clear Filter -->
+            {% if selected_month %}
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-danger">
+                Clear
+            </a>
+            {% endif %}
         </form>
     </div>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-3" role="tablist">
+    <!-- ================= TABS ================= -->
+    <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#expensesTab">
                 Expenses
@@ -81,7 +116,7 @@
 
     <div class="tab-content">
 
-        <!-- Expenses Tab -->
+        <!-- ================= EXPENSES TAB ================= -->
         <div class="tab-pane fade show active" id="expensesTab">
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
@@ -109,13 +144,13 @@
             </table>
         </div>
 
-        <!-- Category Tab -->
+        <!-- ================= CATEGORY TAB ================= -->
         <div class="tab-pane fade" id="categoryTab">
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
                         <th>Category</th>
-                        <th>Total Amount</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -177,5 +212,19 @@
         </div>
     </div>
 </div>
+
+<!-- ================= FILTER JS ================= -->
+<script>
+    const monthInput = document.getElementById("monthInput");
+    const displayInput = document.getElementById("selectedMonthDisplay");
+    const filterBtn = document.getElementById("filterBtn");
+
+    if (monthInput) {
+        monthInput.addEventListener("change", function () {
+            displayInput.value = this.value;
+            filterBtn.disabled = !this.value;
+        });
+    }
+</script>
 
 {% endblock %}
