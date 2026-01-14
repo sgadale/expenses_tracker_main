@@ -1,1 +1,1 @@
-web: gunicorn expense_tracker.expense_tracker.wsgi
+web: python manage.py migrate && gunicorn expense_tracker.expense_tracker.wsgi
