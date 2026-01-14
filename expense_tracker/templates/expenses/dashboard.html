@@ -79,9 +79,20 @@
             </label>
 
             <!-- Apply Filter -->
-            <button class="btn btn-primary" type="submit">
+            <button class="btn btn-primary"
+                    type="submit"
+                    id="applyFilterBtn">
                 Filter
             </button>
+
+            <!-- Clear Filter -->
+            {% if selected_month %}
+            <a href="{% url 'dashboard' %}"
+               id="clearFilterBtn"
+               class="btn btn-outline-danger">
+                ❌
+            </a>
+            {% endif %}
         </form>
     </div>
 
@@ -174,10 +185,15 @@
 
 </div>
 
-<!-- ================= JS (UPDATE LABEL ONLY) ================= -->
+<!-- ================= JS ================= -->
 <script>
 const monthPicker = document.getElementById('monthPicker');
 const monthLabel = document.getElementById('selectedMonthLabel');
+const applyBtn = document.getElementById('applyFilterBtn');
+
+function updateButtonState() {
+    applyBtn.disabled = !monthPicker.value;
+}
 
 monthPicker.addEventListener('change', function () {
     if (!this.value) return;
@@ -186,7 +202,11 @@ monthPicker.addEventListener('change', function () {
     const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
     monthLabel.textContent = `${monthNames[parseInt(month) - 1]} ${year}`;
+    updateButtonState();
 });
+
+// initial state on page load
+updateButtonState();
 </script>
 
 <!-- ================= CSS ================= -->
