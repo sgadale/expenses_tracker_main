@@ -20,3 +20,22 @@ a {
 .message {
     color: green;
 }
+
+/* Make cards breathe on small screens */
+/* @media (max-width: 576px) {
+    .card {
+        border-radius: 12px;
+    }
+
+    h2, h3, h4 {
+        font-size: 1.3rem;
+    }
+
+    table {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1rem;
+    }
+} */ 
