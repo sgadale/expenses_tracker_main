@@ -36,7 +36,7 @@
     </div>
 
     <!-- ================= ACTION ROW ================= -->
-    <div class="d-flex align-items-center mb-4">
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
 
         <!-- LEFT ACTIONS -->
         <div class="d-flex gap-2">
@@ -58,7 +58,6 @@
         <!-- RIGHT FILTER (FORCED TO RIGHT) -->
         <form method="get" class="d-flex align-items-center gap-2 ms-auto">
 
-            <!-- No filter -->
             {% if selected_month %}
                 <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
                     No filter
@@ -75,21 +74,33 @@
                 placeholder="Select month"
                 value="{{ selected_month|default:'' }}">
 
-            <!-- Hidden actual month input -->
-            <input
-                type="month"
-                id="monthInput"
-                name="month"
-                class="d-none"
-                value="{{ selected_month|default:'' }}">
+            <!-- Calendar wrapper (IMPORTANT) -->
+            <div class="position-relative">
 
-            <!-- Calendar button -->
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                id="calendarBtn">
-                📅
-            </button>
+                <!-- REAL month input (invisible but positioned) -->
+                <input
+                    type="month"
+                    id="monthInput"
+                    name="month"
+                    value="{{ selected_month|default:'' }}"
+                    style="
+                        position:absolute;
+                        inset:0;
+                        opacity:0;
+                        width:40px;
+                        height:38px;
+                        cursor:pointer;
+                    ">
+
+                <!-- Calendar icon -->
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    style="width:40px; height:38px;"
+                    onclick="document.getElementById('monthInput').showPicker()">
+                    📅
+                </button>
+            </div>
 
             <!-- Apply filter -->
             <button
@@ -101,6 +112,7 @@
             </button>
 
         </form>
+
     </div>
 
     <!-- ================= TABS ================= -->
@@ -221,16 +233,12 @@
     const monthInput = document.getElementById("monthInput");
     const displayInput = document.getElementById("selectedMonthDisplay");
     const filterBtn = document.getElementById("filterBtn");
-    const calendarBtn = document.getElementById("calendarBtn");
-
-    calendarBtn.addEventListener("click", () => {
-        monthInput.showPicker();
-    });
 
     monthInput.addEventListener("change", function () {
         displayInput.value = this.value;
         filterBtn.disabled = !this.value;
     });
 </script>
+
 
 {% endblock %}
