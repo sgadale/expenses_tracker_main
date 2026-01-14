@@ -1,240 +1,181 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
 {% block content %}
+<div class="container mt-4">
 
-<h3 class="mb-4">Dashboard</h3>
+    <!-- Dashboard Header -->
+    <h2 class="mb-4">Dashboard</h2>
 
-<!-- ================= Summary Cards ================= -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3">
-            <h6>Total Expense</h6>
-            <h4 class="mb-0">₹{{ total_expense }}</h4>
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Total Expense</h6>
+                    <h4>₹{{ total_expense }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Budget</h6>
+                    <h4>₹{{ budget_amount }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Remaining</h6>
+                    <h4>₹{{ remaining_amount }}</h4>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3">
-            <h6>Budget</h6>
-            <h4 class="mb-0">
-                {% if budget %}₹{{ budget.amount }}{% else %}Not Set{% endif %}
-            </h4>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3">
-            <h6>Remaining</h6>
-            <h4 class="mb-0">₹{{ remaining }}</h4>
-        </div>
-    </div>
-</div>
 
-<!-- ================= Actions + Filter Row ================= -->
-<div class="row align-items-center mb-4">
+    <!-- Action Row -->
+    <div class="d-flex align-items-center gap-2 mb-4">
 
-    <div class="col-auto">
+        <!-- Add Expense Button -->
         <button
             class="btn btn-success"
             data-bs-toggle="modal"
             data-bs-target="#addExpenseModal">
             + Add Expense
         </button>
-    </div>
 
-    <div class="col-auto">
+        <!-- Set Budget Button -->
         <button
-                class="btn btn-secondary"
-                data-bs-toggle="modal"
-                data-bs-target="#setBudgetModal">
-                Set Budget
+            class="btn btn-secondary"
+            data-bs-toggle="modal"
+            data-bs-target="#setBudgetModal">
+            Set Budget
         </button>
-    </div>
 
-    <!-- Filter -->
-    <div class="col-auto ms-auto">
-        <form method="get" id="monthFilterForm"
-              class="d-flex align-items-center gap-2">
-
-            <!-- Selected Month Display -->
-            <span id="selectedMonthLabel"
-                  class="badge bg-light text-dark border px-3 py-2">
-                {% if selected_month %}
-                    {% with selected_month|slice:":4" as year %}
-                    {% with selected_month|slice:"5:7" as month %}
-                        {% if month == "01" %}Jan{% elif month == "02" %}Feb{% elif month == "03" %}Mar
-                        {% elif month == "04" %}Apr{% elif month == "05" %}May{% elif month == "06" %}Jun
-                        {% elif month == "07" %}Jul{% elif month == "08" %}Aug{% elif month == "09" %}Sep
-                        {% elif month == "10" %}Oct{% elif month == "11" %}Nov{% elif month == "12" %}Dec
-                        {% endif %}
-                        {{ year }}
-                    {% endwith %}
-                    {% endwith %}
-                {% else %}
-                    No filter
-                {% endif %}
-            </span>
-
-            <!-- Month Picker -->
-            <label class="month-picker-wrapper mb-0">
-                <input type="month"
-                       name="month"
-                       id="monthPicker"
-                       value="{{ selected_month }}"
-                       class="month-picker-hidden">
-                <span class="calendar-icon">📅</span>
-            </label>
-
-            <!-- Apply Filter -->
-            <button class="btn btn-primary"
-                    type="submit"
-                    id="applyFilterBtn">
-                Filter
-            </button>
-
-            <!-- Clear Filter -->
-            {% if selected_month %}
-            <a href="{% url 'dashboard' %}"
-               id="clearFilterBtn"
-               class="btn btn-outline-danger">
-                ❌
-            </a>
-            {% endif %}
+        <!-- Filter -->
+        <form method="get" class="d-flex align-items-center ms-auto gap-2">
+            <input
+                type="month"
+                name="month"
+                class="form-control"
+                value="{{ selected_month }}">
+            <button class="btn btn-primary" type="submit">Filter</button>
         </form>
     </div>
 
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#expensesTab">
+                Expenses
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#categoryTab">
+                Category-wise Total
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+
+        <!-- Expenses Tab -->
+        <div class="tab-pane fade show active" id="expensesTab">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.title }}</td>
+                        <td>{{ expense.category }}</td>
+                        <td>₹{{ expense.amount }}</td>
+                        <td>{{ expense.date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No expenses found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Category Tab -->
+        <div class="tab-pane fade" id="categoryTab">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Category</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in category_totals %}
+                    <tr>
+                        <td>{{ row.category }}</td>
+                        <td>₹{{ row.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No data</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
 </div>
 
-<!-- ================= Tabs ================= -->
-<ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
-        <button class="nav-link active"
-                data-bs-toggle="tab"
-                data-bs-target="#expenses"
-                type="button">
-            Expenses
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link"
-                data-bs-toggle="tab"
-                data-bs-target="#category"
-                type="button">
-            Category-wise Total
-        </button>
-    </li>
-</ul>
-
-<div class="tab-content">
-
-    <!-- Expenses Tab -->
-    <div class="tab-pane fade show active" id="expenses">
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th width="140">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for expense in expenses %}
-                <tr>
-                    <td>{{ expense.title }}</td>
-                    <td>{{ expense.category }}</td>
-                    <td>₹{{ expense.amount }}</td>
-                    <td>{{ expense.date }}</td>
-                    <td>
-                        <a href="{% url 'edit_expense' expense.id %}"
-                           class="btn btn-sm btn-warning">Edit</a>
-                        <a href="{% url 'delete_expense' expense.id %}"
-                           class="btn btn-sm btn-danger">Delete</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">
-                        No expenses found
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!-- ================= ADD EXPENSE MODAL ================= -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'add_expense' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {{ expense_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <!-- Category Tab -->
-    <div class="tab-pane fade" id="category">
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Category</th>
-                    <th>Total Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in category_totals %}
-                <tr>
-                    <td>{{ item.category__name }}</td>
-                    <td>₹{{ item.total }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="text-center">
-                        No data available
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
 </div>
 
-<!-- ================= JS ================= -->
-<script>
-const monthPicker = document.getElementById('monthPicker');
-const monthLabel = document.getElementById('selectedMonthLabel');
-const applyBtn = document.getElementById('applyFilterBtn');
-
-function updateButtonState() {
-    applyBtn.disabled = !monthPicker.value;
-}
-
-monthPicker.addEventListener('change', function () {
-    if (!this.value) return;
-
-    const [year, month] = this.value.split('-');
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-    monthLabel.textContent = `${monthNames[parseInt(month) - 1]} ${year}`;
-    updateButtonState();
-});
-
-// initial state on page load
-updateButtonState();
-</script>
-
-<!-- ================= CSS ================= -->
-<style>
-.month-picker-wrapper {
-    position: relative;
-    cursor: pointer;
-}
-
-.month-picker-hidden {
-    position: absolute;
-    opacity: 0;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-}
-
-.calendar-icon {
-    font-size: 18px;
-    padding: 6px 8px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    background: #fff;
-}
-</style>
+<!-- ================= SET BUDGET MODAL ================= -->
+<div class="modal fade" id="setBudgetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'set_budget' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Set Monthly Budget</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {{ budget_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
